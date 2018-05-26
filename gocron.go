@@ -467,10 +467,26 @@ func (s *Scheduler) RunAllwithDelay(d int) {
 }
 
 // Remove specific job j
-func (s *Scheduler) Remove(j interface{}) {
+func (s *Scheduler) RemoveFromFunc(j interface{}) {
 	i := 0
 	for ; i < s.size; i++ {
 		if s.jobs[i].jobFunc == getFunctionName(j) {
+			break
+		}
+	}
+
+	for j := (i + 1); j < s.size; j++ {
+		s.jobs[i] = s.jobs[j]
+		i++
+	}
+	s.size = s.size - 1
+}
+
+// Remove job of specific id
+func (s *Scheduler) RemoveFromId(id uint64) {
+	i := 0
+	for ; i < s.size; i++ {
+		if s.jobs[i].id == id {
 			break
 		}
 	}
@@ -566,9 +582,14 @@ func Clear() {
 	defaultScheduler.Clear()
 }
 
-// Remove
-func Remove(j interface{}) {
-	defaultScheduler.Remove(j)
+// Remove From Function
+func RemoveFromFunc(j interface{}) {
+	defaultScheduler.RemoveFromFunc(j)
+}
+
+// Remove from job id
+func RemoveFromId(id uint64) {
+	defaultScheduler.RemoveFromId(id)
 }
 
 // NextRun gets the next running time
