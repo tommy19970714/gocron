@@ -72,8 +72,19 @@ type Job struct {
 }
 
 // Create a new job with the time interval.
-func NewJob(intervel uint64) *Job {
-	return &Job{
+func NewJob(id uint64, intervel uint64) *Job {
+	return &Job{id,
+		intervel,
+		"", "", "",
+		time.Unix(0, 0),
+		time.Unix(0, 0), 0,
+		time.Sunday,
+		make(map[string]interface{}),
+		make(map[string]([]interface{})),
+	}
+}
+func NewJobData(id uint64, intervel uint64) Job {
+	return Job{id,
 		intervel,
 		"", "", "",
 		time.Unix(0, 0),
@@ -366,6 +377,14 @@ func (j *Job) Weeks() *Job {
 	return j
 }
 
+func (j *Job) Id() uint64 {
+	return j.id
+}
+
+func (j *Job) RunTime() time.Time {
+	return j.nextRun
+}
+
 // Class Scheduler, the only data member is the list of jobs.
 type Scheduler struct {
 	// Array store jobs
@@ -387,6 +406,20 @@ func (s *Scheduler) Swap(i, j int) {
 
 func (s *Scheduler) Less(i, j int) bool {
 	return s.jobs[j].nextRun.After(s.jobs[i].nextRun)
+}
+
+func (s *Scheduler) NextId() uint64 {
+	var idList = make([]uint64, s.size)
+	for i, myjob := range s.jobs {
+		idList[i] = myjob.id
+	}
+	sort.Slice(idList, func(i, j int) bool { return idList[i] < idList[j] })
+	for i := 0; i < MAXJOBNUM; i++ {
+		if uint64(i) != idList[i] {
+			return uint64(i)
+		}
+	}
+	return 0 //: TODO add exception handling
 }
 
 // Create a new scheduler
@@ -419,6 +452,16 @@ func (s *Scheduler) NextRun() (*Job, time.Time) {
 	}
 	sort.Sort(s)
 	return s.jobs[0], s.jobs[0].nextRun
+}
+
+// return all jobs
+func (s *Scheduler) AllJobs() []Job {
+	sort.Sort(s)
+	jobList := make([]Job, s.size)
+	for i, job := range s.jobs[:s.size] {
+		jobList[i] = NewJobData(job.id, job.interval)
+	}
+	return jobList
 }
 
 // Schedule a new periodic job
@@ -595,4 +638,9 @@ func RemoveFromId(id uint64) {
 // NextRun gets the next running time
 func NextRun() (job *Job, time time.Time) {
 	return defaultScheduler.NextRun()
+}
+
+// return all jobs
+func AllJobs() (jobs []Job) {
+	return defaultScheduler.AllJobs()
 }
