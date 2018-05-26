@@ -41,6 +41,9 @@ const MAXJOBNUM = 10000
 
 type Job struct {
 
+	// job id for delete job
+	id uint64
+
 	// pause interval * unit bettween runs
 	interval uint64
 
@@ -419,11 +422,22 @@ func (s *Scheduler) NextRun() (*Job, time.Time) {
 }
 
 // Schedule a new periodic job
-func (s *Scheduler) Every(interval uint64) *Job {
-	job := NewJob(interval)
+func (s *Scheduler) EveryWithId(id uint64, interval uint64) *Job {
+	job := NewJob(id, interval)
 	s.jobs[s.size] = job
 	s.size++
 	return job
+}
+
+// Schedule a new periodic job only id
+func (s *Scheduler) EveryOnlyId(id uint64) *Job {
+	return s.EveryWithId(id, 1)
+}
+
+// Schedule a new periodic job
+func (s *Scheduler) Every(interval uint64) *Job {
+	var id = s.NextId()
+	return s.EveryWithId(id, interval)
 }
 
 // Run all the jobs that are scheduled to run.
@@ -503,6 +517,16 @@ var defaultScheduler = NewScheduler()
 var jobs = defaultScheduler.jobs
 
 // Schedule a new periodic job
+func EveryWithId(id uint64, interval uint64) *Job {
+	return defaultScheduler.EveryWithId(id, interval)
+}
+
+// Schedule a new periodic job only job id
+func EveryOnlyId(id uint64) *Job {
+	return defaultScheduler.EveryWithId(id, 1)
+}
+
+// Schedule a new periodic job with automatic id
 func Every(interval uint64) *Job {
 	return defaultScheduler.Every(interval)
 }
