@@ -152,6 +152,19 @@ func formatTime(t string) (hour, min int, err error) {
 	return hour, min, nil
 }
 
+//	s.Every(1).AtDate("2006-01-02 15:04:05").Do(task)
+func (j *Job) AtDate(t string) (job *Job) {
+	format := "2006-01-02 15:04:05"
+	date, err := time.Parse(format, t)
+	if err != nil {
+		panic(err)
+	}
+	job = j.Days()
+	job.id = 5
+	job.lastRun = date
+	return
+}
+
 //	s.Every(1).Day().At("10:30").Do(task)
 //	s.Every(1).Monday().At("10:30").Do(task)
 func (j *Job) At(t string) *Job {
