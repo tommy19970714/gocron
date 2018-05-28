@@ -155,7 +155,7 @@ func formatTime(t string) (hour, min int, err error) {
 //	s.Every(1).AtDate("2006-01-02 15:04:05").Do(task)
 func (j *Job) AtDate(t string) (job *Job) {
 	format := "2006-01-02 15:04:05"
-	date, err := time.Parse(format, t)
+	date, err := time.ParseInLocation(format, t, loc)
 	if err != nil {
 		panic(err)
 	}
