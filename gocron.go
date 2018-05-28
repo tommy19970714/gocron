@@ -83,17 +83,6 @@ func NewJob(id uint64, intervel uint64) *Job {
 		make(map[string]([]interface{})),
 	}
 }
-func NewJobData(id uint64, intervel uint64) Job {
-	return Job{id,
-		intervel,
-		"", "", "",
-		time.Unix(0, 0),
-		time.Unix(0, 0), 0,
-		time.Sunday,
-		make(map[string]interface{}),
-		make(map[string]([]interface{})),
-	}
-}
 
 // True if the job should be run now
 func (j *Job) shouldRun() bool {
@@ -459,7 +448,7 @@ func (s *Scheduler) AllJobs() []Job {
 	sort.Sort(s)
 	jobList := make([]Job, s.size)
 	for i, job := range s.jobs[:s.size] {
-		jobList[i] = NewJobData(job.id, job.interval)
+		jobList[i] = *job
 	}
 	return jobList
 }
