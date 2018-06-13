@@ -159,10 +159,11 @@ func (j *Job) AtDate(t string) (job *Job) {
 	if err != nil {
 		panic(err)
 	}
-	job = j.Days()
-	job.id = 5
-	job.lastRun = date
-	return
+	j.unit = "once"
+	j.interval = 0
+	j.lastRun = time.Now()
+	j.nextRun = date
+	return j
 }
 
 //	s.Every(1).Day().At("10:30").Do(task)
@@ -216,22 +217,28 @@ func (j *Job) scheduleNextRun() {
 		j.nextRun = j.lastRun.Add(j.period * time.Second)
 	} else {
 		switch j.unit {
+		case "once":
+			break
 		case "minutes":
 			j.period = time.Duration(j.interval * 60)
+			j.nextRun = j.lastRun.Add(j.period * time.Second)
 			break
 		case "hours":
 			j.period = time.Duration(j.interval * 60 * 60)
+			j.nextRun = j.lastRun.Add(j.period * time.Second)
 			break
 		case "days":
 			j.period = time.Duration(j.interval * 60 * 60 * 24)
+			j.nextRun = j.lastRun.Add(j.period * time.Second)
 			break
 		case "weeks":
 			j.period = time.Duration(j.interval * 60 * 60 * 24 * 7)
+			j.nextRun = j.lastRun.Add(j.period * time.Second)
 			break
 		case "seconds":
 			j.period = time.Duration(j.interval)
+			j.nextRun = j.lastRun.Add(j.period * time.Second)
 		}
-		j.nextRun = j.lastRun.Add(j.period * time.Second)
 	}
 }
 
@@ -492,6 +499,9 @@ func (s *Scheduler) RunPending() {
 	if n != 0 {
 		for i := 0; i < n; i++ {
 			runnableJobs[i].run()
+			if runnableJobs[i].unit == "once" {
+				s.RemoveFromId(runnableJobs[i].id)
+			}
 		}
 	}
 }
