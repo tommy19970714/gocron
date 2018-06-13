@@ -166,6 +166,14 @@ func (j *Job) AtDate(t string) (job *Job) {
 	return j
 }
 
+func (j *Job) AtDateWithTime(date time.Time) (job *Job) {
+	j.unit = "once"
+	j.interval = 0
+	j.lastRun = time.Now()
+	j.nextRun = date
+	return j
+}
+
 //	s.Every(1).Day().At("10:30").Do(task)
 //	s.Every(1).Monday().At("10:30").Do(task)
 func (j *Job) At(t string) *Job {
